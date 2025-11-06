@@ -1,0 +1,126 @@
+{
+  "info": {
+    "_postman_id": "6c60e719-4fd6-4183-92ee-b69c7344b5f0",
+    "name": "Bank",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "28224690",
+    "_collection_link": "https://winter-trinity-526937.postman.co/workspace/Desafio-fadesp~bc849856-9c44-4317-a010-ced5949fab1a/collection/28224690-6c60e719-4fd6-4183-92ee-b69c7344b5f0?action=share&source=collection_link&creator=28224690"
+  },
+  "item": [
+    {
+      "name": "Realizar (cartão de crédito)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"codigoDebito\": 12238,\r\n  \"cpfCnpjPagador\": \"52998224725\",\r\n  \"metodoPagamento\": \"CARTAO_CREDITO\",\r\n  \"numeroCartao\": \"4111111111111111\",\r\n  \"valorPagamento\": 13233.66\r\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/pagamento/realizar",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["pagamento", "realizar"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Realizar (PIX)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"codigoDebito\": 98765,\r\n  \"cpfCnpjPagador\": \"07802958032\",\r\n  \"metodoPagamento\": \"PIX\",\r\n  \"valorPagamento\": 500.00\r\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/pagamento/realizar",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["pagamento", "realizar"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Atualizar status",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"id\": 1,\r\n  \"status\": \"PROCESSADO_FALHA\"\r\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/pagamento/atualizar",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["pagamento", "atualizar"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Excluir (exclusão lógica)",
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/pagamento/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["pagamento", "1"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Listar (com filtros)",
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/pagamento/listar?codigoDebito=12238&cpfCnpjPagador=52998224725&status=PENDENTE_PROCESSAMENTO",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["pagamento", "listar"],
+          "query": [
+            { "key": "codigoDebito", "value": "12238" },
+            { "key": "cpfCnpjPagador", "value": "52998224725" },
+            { "key": "status", "value": "PENDENTE_PROCESSAMENTO" }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Buscar por ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/pagamento/1",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["pagamento", "1"]
+        }
+      },
+      "response": []
+    }
+  ]
+}

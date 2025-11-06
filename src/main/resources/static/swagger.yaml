@@ -1,0 +1,199 @@
+openapi: 3.0.3
+info:
+  title: API de Pagamentos - FADESP
+  description: |
+    API REST para criar, consultar, atualizar status e excluir logicamente pagamentos.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Servidor Local
+
+tags:
+  - name: pagamentos
+    description: Operações de pagamentos
+
+paths:
+
+  /pagamentos:
+    post:
+      tags: [pagamentos]
+      summary: Criar/receber pagamento
+      operationId: criarPagamento
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PagamentoDTO' }
+            examples:
+              pix:
+                value:
+                  codigoDebito: 12345
+                  cpfCnpjPagador: "12345678901"
+                  metodoPagamento: "PIX"
+                  valorPagamento: 150.75
+              boleto:
+                value:
+                  codigoDebito: 12346
+                  cpfCnpjPagador: "12345678901234"
+                  metodoPagamento: "BOLETO"
+                  valorPagamento: 300.00
+              cartao_credito:
+                value:
+                  codigoDebito: 12347
+                  cpfCnpjPagador: "04143271281"
+                  metodoPagamento: "CARTAO_CREDITO"
+                  numeroCartao: "4111111111111111"
+                  valorPagamento: 500.00
+              cartao_debito:
+                value:
+                  codigoDebito: 12348
+                  cpfCnpjPagador: "04143271281"
+                  metodoPagamento: "CARTAO_DEBITO"
+                  numeroCartao: "5222222222222222"
+                  valorPagamento: 120.50
+      responses:
+        '201':
+          description: Pagamento criado
+          headers:
+            Location:
+              description: URL do recurso criado
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Pagamento' }
+        '400': { description: Erro de validação }
+    get:
+      tags: [pagamentos]
+      summary: Listar/filtrar pagamentos
+      operationId: listarPagamentos
+      parameters:
+        - name: codigoDebito
+          in: query
+          required: false
+          schema: { type: integer, format: int32 }
+        - name: cpfCnpj
+          in: query
+          required: false
+          schema: { type: string, description: "Usa FiltroPagamentoDTO.cpfCnpj" }
+        - name: status
+          in: query
+          required: false
+          schema: { $ref: '#/components/schemas/StatusPagamentoEnum' }
+      responses:
+        '200':
+          description: Lista de pagamentos
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Pagamento' }
+
+  /pagamentos/{id}:
+    get:
+      tags: [pagamentos]
+      summary: Buscar pagamento por ID
+      operationId: buscarPagamento
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Pagamento encontrado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Pagamento' }
+        '404': { description: Pagamento não encontrado }
+    delete:
+      tags: [pagamentos]
+      summary: Exclusão lógica (apenas se PENDENTE_PROCESSAMENTO)
+      operationId: excluirPagamento
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '204': { description: Excluído logicamente }
+        '404': { description: Pagamento não encontrado }
+
+  /pagamentos/{id}/status:
+    put:
+      tags: [pagamentos]
+      summary: Atualizar status do pagamento
+      operationId: atualizarStatusPagamento
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AtualizarPagamentoDTO' }
+            examples:
+              sucesso:
+                value: { id: 10, status: "PROCESSADO_SUCESSO" }
+              falha:
+                value: { id: 10, status: "PROCESSADO_FALHA" }
+              reprocessar:
+                value: { id: 10, status: "PENDENTE_PROCESSAMENTO" }
+      responses:
+        '200':
+          description: Pagamento atualizado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Pagamento' }
+        '400': { description: Transição inválida ou payload inválido }
+        '404': { description: Pagamento não encontrado }
+
+components:
+  schemas:
+
+    # ===== Enums =====
+    MetodoPagamentoEnum:
+      type: string
+      enum: [BOLETO, PIX, CARTAO_CREDITO, CARTAO_DEBITO]
+    StatusPagamentoEnum:
+      type: string
+      enum: [PENDENTE_PROCESSAMENTO, PROCESSADO_SUCESSO, PROCESSADO_FALHA]
+
+    # ===== Entidade =====
+    Pagamento:
+      type: object
+      properties:
+        id: { type: integer, format: int64, readOnly: true }
+        codigoDebito: { type: integer, format: int32 }
+        cpfCnpjPagador: { type: string }
+        metodoPagamento: { $ref: '#/components/schemas/MetodoPagamentoEnum' }
+        numeroCartao:
+          type: string
+          nullable: true
+          description: Obrigatório para pagamentos por cartão (somente últimos 4 dígitos podem ser armazenados)
+        valorPagamento: { type: number, format: double }
+        status: { $ref: '#/components/schemas/StatusPagamentoEnum' }
+        ativo: { type: boolean, readOnly: true }
+
+    # ===== DTOs =====
+    PagamentoDTO:
+      type: object
+      properties:
+        codigoDebito: { type: integer, format: int32 }
+        cpfCnpjPagador: { type: string }
+        metodoPagamento: { $ref: '#/components/schemas/MetodoPagamentoEnum' }
+        valorPagamento: { type: number, format: double }
+        numeroCartao:
+          type: string
+          nullable: true
+          description: Obrigatório para CARTAO_CREDITO ou CARTAO_DEBITO
+      required: [codigoDebito, cpfCnpjPagador, metodoPagamento, valorPagamento]
+
+    AtualizarPagamentoDTO:
+      type: object
+      properties:
+        id: { type: integer, format: int64 }
+        status: { $ref: '#/components/schemas/StatusPagamentoEnum' }
+      required: [id, status]
