@@ -90,7 +90,7 @@ Renomeie o arquivo para data.sql para que o Spring Boot o execute automaticament
 
 #  Autor
 
-Valberton Cabral
+Valberton Cabral |
 Desenvolvedor Java 
  ### Email: valbertonviana@gmail.com
  ### GitHub:  https://github.com/CabralV8
